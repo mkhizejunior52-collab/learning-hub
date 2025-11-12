@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LearnHub Secure Access</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo h1 {
+            color: #333;
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .logo p {
+            color: #666;
+            font-size: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        input[type="text"],
+        input[type="password"],
+        input[type="email"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        input[type="text"]:focus,
+        input[type="password"]:focus,
+        input[type="email"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            width: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .form-toggle {
+            text-align: center;
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .form-toggle a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .form-toggle a:hover {
+            text-decoration: underline;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .message {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .security-features {
+            margin-top: 25px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            font-size: 0.9rem;
+        }
+
+        .security-features h4 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .feature-list {
+            list-style: none;
+        }
+
+        .feature-list li {
+            padding: 5px 0;
+            color: #666;
+        }
+
+        .feature-list li:before {
+            content: "✓ ";
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .password-strength {
+            height: 4px;
+            background: #e0e0e0;
+            border-radius: 2px;
+            margin-top: 5px;
+            overflow: hidden;
+        }
+
+        .strength-bar {
+            height: 100%;
+            width: 0%;
+            transition: all 0.3s ease;
+        }
+
+        .weak { background: #dc3545; width: 33%; }
+        .medium { background: #ffc107; width: 66%; }
+        .strong { background: #28a745; width: 100%; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Login Form -->
+        <div id="loginForm">
+            <div class="logo">
+                <h1>🔐 LearnHub</h1>
+                <p>Secure Access Portal</p>
+            </div>
+
+            <div id="loginMessage" class="message hidden"></div>
+
+            <form id="loginFormElement">
+                <div class="form-group">
+                    <label for="loginUsername">Username</label>
+                    <input type="text" id="loginUsername" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="loginPassword">Password</label>
+                    <input type="password" id="loginPassword" required>
+                </div>
+
+                <button type="submit" class="btn">Sign In</button>
+            </form>
+
+            <div class="form-toggle">
+                <p>Don't have an account? <a onclick="showRegister()">Register here</a></p>
+            </div>
+
+            <div class="security-features">
+                <h4>Security Features:</h4>
+                <ul class="feature-list">
+                    <li>Secure password storage</li>
+                    <li>Session management</li>
+                    <li>Access control</li>
+                    <li>Encrypted authentication</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Register Form -->
+        <div id="registerForm" class="hidden">
+            <div class="logo">
+                <h1>👤 Create Account</h1>
+                <p>Join LearnHub Secure</p>
+            </div>
+
+            <div id="registerMessage" class="message hidden"></div>
+
+            <form id="registerFormElement">
+                <div class="form-group">
+                    <label for="registerUsername">Username</label>
+                    <input type="text" id="registerUsername" required minlength="3">
+                </div>
+
+                <div class="form-group">
+                    <label for="registerEmail">Email</label>
+                    <input type="email" id="registerEmail" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="registerPassword">Password</label>
+                    <input type="password" id="registerPassword" required minlength="6">
+                    <div class="password-strength">
+                        <div class="strength-bar" id="passwordStrength"></div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirmPassword">Confirm Password</label>
+                    <input type="password" id="confirmPassword" required>
+                </div>
+
+                <button type="submit" class="btn">Create Account</button>
+            </form>
+
+            <div class="form-toggle">
+                <p>Already have an account? <a onclick="showLogin()">Sign in here</a></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const loginForm = document.getElementById('loginForm');
+        const registerForm = document.getElementById('registerForm');
+        const loginFormElement = document.getElementById('loginFormElement');
+        const registerFormElement = document.getElementById('registerFormElement');
+        const loginMessage = document.getElementById('loginMessage');
+        const registerMessage = document.getElementById('registerMessage');
+        const passwordStrength = document.getElementById('passwordStrength');
+        const registerPassword = document.getElementById('registerPassword');
+
+        // Password strength indicator
+        registerPassword.addEventListener('input', function() {
+            const password = this.value;
+            let strength = 'weak';
+            
+            if (password.length >= 8) {
+                if (/[A-Z]/.test(password) && /[0-9]/.test(password) && /[^A-Za-z0-9]/.test(password)) {
+                    strength = 'strong';
+                } else if (/[A-Z]/.test(password) || /[0-9]/.test(password)) {
+                    strength = 'medium';
+                }
+            }
+            
+            passwordStrength.className = 'strength-bar ' + strength;
+        });
+
+        // Form Toggle Functions
+        function showRegister() {
+            loginForm.classList.add('hidden');
+            registerForm.classList.remove('hidden');
+            clearMessages();
+        }
+
+        function showLogin() {
+            registerForm.classList.add('hidden');
+            loginForm.classList.remove('hidden');
+            clearMessages();
+        }
+
+        function clearMessages() {
+            loginMessage.classList.add('hidden');
+            registerMessage.classList.add('hidden');
+        }
+
+        // User Storage Management
+        function getUsers() {
+            return JSON.parse(localStorage.getItem('learnhub_users') || '{}');
+        }
+
+        function saveUser(username, userData) {
+            const users = getUsers();
+            users[username] = userData;
+            localStorage.setItem('learnhub_users', JSON.stringify(users));
+        }
+
+        function validateUser(username, password) {
+            const users = getUsers();
+            const user = users[username];
+            return user && user.password === password;
+        }
+
+        // Session Management
+        function createSession(username) {
+            const session = {
+                username: username,
+                token: generateToken(),
+                createdAt: new Date().toISOString()
+            };
+            localStorage.setItem('learnhub_session', JSON.stringify(session));
+            return session;
+        }
+
+        function getCurrentSession() {
+            return JSON.parse(localStorage.getItem('learnhub_session') || 'null');
+        }
+
+        function generateToken() {
+            return Math.random().toString(36).substring(2) + Date.now().toString(36);
+        }
+
+        // Form Handlers
+        registerFormElement.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('registerUsername').value;
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            // Validation
+            if (password !== confirmPassword) {
+                showMessage(registerMessage, 'Passwords do not match!', 'error');
+                return;
+            }
+
+            if (getUsers()[username]) {
+                showMessage(registerMessage, 'Username already exists!', 'error');
+                return;
+            }
+
+            // Save user
+            saveUser(username, {
+                username: username,
+                email: email,
+                password: password, // In real app, this would be hashed
+                createdAt: new Date().toISOString()
+            });
+
+            showMessage(registerMessage, 'Account created successfully! Redirecting...', 'success');
+            
+            // Auto login and redirect
+            setTimeout(() => {
+                createSession(username);
+                redirectToDashboard();
+            }, 1500);
+        });
+
+        loginFormElement.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+
+            if (validateUser(username, password)) {
+                createSession(username);
+                showMessage(loginMessage, 'Login successful! Redirecting...', 'success');
+                
+                setTimeout(() => {
+                    redirectToDashboard();
+                }, 1000);
+            } else {
+                showMessage(loginMessage, 'Invalid username or password!', 'error');
+            }
+        });
+
+        // Utility Functions
+        function showMessage(element, message, type) {
+            element.textContent = message;
+            element.className = `message ${type}`;
+            element.classList.remove('hidden');
+        }
+
+        function redirectToDashboard() {
+            // In a real app, this would redirect to your actual dashboard
+            // For now, we'll simulate the redirection
+            window.location.href = 'learning-dashboard.html';
+            
+            // If the dashboard file doesn't exist, show a message
+            setTimeout(() => {
+                alert('Redirecting to Learning Dashboard...\n\nIn a real implementation, this would open your main website.\n\nFor now, save the previous HTML code as "learning-dashboard.html" in the same folder.');
+            }, 500);
+        }
+
+        // Check if user is already logged in
+        function checkExistingSession() {
+            const session = getCurrentSession();
+            if (session) {
+                // Optional: Add session expiration check here
+                showMessage(loginMessage, `Welcome back, ${session.username}! Redirecting...`, 'success');
+                setTimeout(redirectToDashboard, 1000);
+            }
+        }
+
+        // Initialize
+        checkExistingSession();
+    </script>
+</body>
+</html>

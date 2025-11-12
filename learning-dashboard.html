@@ -1,0 +1,426 @@
+// Security Check - Add this to the TOP of your dashboard's script section
+function checkAuthentication() {
+    const session = JSON.parse(localStorage.getItem('learnhub_session') || 'null');
+    
+    if (!session || !session.token) {
+        alert('Access denied! Please login first.');
+        window.location.href = 'login.html';
+        return false;
+    }
+    
+    // Optional: Check session expiration (24 hours)
+    const sessionTime = new Date(session.createdAt);
+    const currentTime = new Date();
+    const hoursDiff = (currentTime - sessionTime) / (1000 * 60 * 60);
+    
+    if (hoursDiff > 24) {
+        localStorage.removeItem('learnhub_session');
+        alert('Session expired! Please login again.');
+        window.location.href = 'login.html';
+        return false;
+    }
+    
+    return true;
+}
+
+// Add this line at the start of your dashboard's script
+if (!checkAuthentication()) {
+    // Stop execution if not authenticated
+    throw new Error('Authentication required');
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LearnHub - Your Learning Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+            border-radius: 0 0 20px 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .header-content h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header-content p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .card h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.4rem;
+        }
+
+        .progress-bar {
+            background: #e0e0e0;
+            border-radius: 10px;
+            height: 10px;
+            margin: 15px 0;
+            overflow: hidden;
+        }
+
+        .progress {
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            height: 100%;
+            width: 0%;
+            transition: width 1s ease-in-out;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .resources-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .resource-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            transition: all 0.3s ease;
+        }
+
+        .resource-item:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+
+        .notes-section {
+            margin-top: 20px;
+        }
+
+        #notesInput {
+            width: 100%;
+            height: 100px;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            resize: vertical;
+            margin-bottom: 10px;
+        }
+
+        .notes-list {
+            margin-top: 20px;
+        }
+
+        .note-item {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid #764ba2;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .timer-display {
+            font-size: 2rem;
+            text-align: center;
+            margin: 20px 0;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .timer-controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 20px;
+            color: #666;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            
+            .header-content h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <h1>🚀 LearnHub</h1>
+                <p>Your Personal Learning Dashboard</p>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="dashboard">
+            <!-- Progress Tracker -->
+            <div class="card">
+                <h3>📊 Learning Progress</h3>
+                <p>HTML & CSS Mastery</p>
+                <div class="progress-bar">
+                    <div class="progress" id="htmlProgress"></div>
+                </div>
+                <p>JavaScript Skills</p>
+                <div class="progress-bar">
+                    <div class="progress" id="jsProgress"></div>
+                </div>
+                <p>Web Development</p>
+                <div class="progress-bar">
+                    <div class="progress" id="webProgress"></div>
+                </div>
+                <button class="btn" onclick="updateProgress()">Update Progress</button>
+            </div>
+
+            <!-- Study Timer -->
+            <div class="card">
+                <h3>⏰ Study Timer</h3>
+                <div class="timer-display" id="timerDisplay">25:00</div>
+                <div class="timer-controls">
+                    <button class="btn" onclick="startTimer(25)">25 min</button>
+                    <button class="btn" onclick="startTimer(5)">5 min</button>
+                    <button class="btn" onclick="resetTimer()">Reset</button>
+                </div>
+            </div>
+
+            <!-- Learning Resources -->
+            <div class="card">
+                <h3>📚 Quick Resources</h3>
+                <div class="resources-grid">
+                    <div class="resource-item" onclick="openResource('https://developer.mozilla.org/')">
+                        <strong>MDN Web Docs</strong>
+                        <p>Comprehensive web development documentation</p>
+                    </div>
+                    <div class="resource-item" onclick="openResource('https://www.w3schools.com/')">
+                        <strong>W3Schools</strong>
+                        <p>Web development tutorials and references</p>
+                    </div>
+                    <div class="resource-item" onclick="openResource('https://css-tricks.com/')">
+                        <strong>CSS-Tricks</strong>
+                        <p>CSS tips, tricks, and techniques</p>
+                    </div>
+                    <div class="resource-item" onclick="openResource('https://javascript.info/')">
+                        <strong>Modern JS Tutorial</strong>
+                        <p>Modern JavaScript from basics to advanced</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notes Section -->
+            <div class="card">
+                <h3>📝 Learning Notes</h3>
+                <div class="notes-section">
+                    <textarea id="notesInput" placeholder="Write your learning notes here..."></textarea>
+                    <button class="btn" onclick="saveNote()">Save Note</button>
+                    <div class="notes-list" id="notesList"></div>
+                </div>
+            </div>
+
+            <!-- Code Playground -->
+            <div class="card">
+                <h3>💻 Code Practice</h3>
+                <p>Practice your HTML, CSS, and JavaScript skills:</p>
+                <div style="margin-top: 15px;">
+                    <button class="btn" onclick="openCodePen()">Open CodePen</button>
+                    <button class="btn" onclick="openJSFiddle()">Open JSFiddle</button>
+                </div>
+                <div style="margin-top: 15px;">
+                    <p><strong>Today's Challenge:</strong></p>
+                    <p>Create a responsive navigation menu using CSS Flexbox.</p>
+                </div>
+            </div>
+
+            <!-- Goals Tracker -->
+            <div class="card">
+                <h3>🎯 Weekly Goals</h3>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li>Complete 3 coding exercises</li>
+                    <li>Learn 2 new CSS properties</li>
+                    <li>Build one small project</li>
+                    <li>Read documentation for 30 minutes</li>
+                </ul>
+                <button class="btn" onclick="addGoal()" style="margin-top: 15px;">Add New Goal</button>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <p>Built for learning purposes • Practice makes perfect! 🎓</p>
+        </div>
+    </footer>
+
+    <script>
+        // Progress Tracking
+        function updateProgress() {
+            document.getElementById('htmlProgress').style.width = Math.floor(Math.random() * 100) + '%';
+            document.getElementById('jsProgress').style.width = Math.floor(Math.random() * 100) + '%';
+            document.getElementById('webProgress').style.width = Math.floor(Math.random() * 100) + '%';
+        }
+
+        // Initialize progress bars
+        window.onload = function() {
+            updateProgress();
+            loadNotes();
+        };
+
+        // Timer Functionality
+        let timerInterval;
+        let timeLeft = 1500; // 25 minutes in seconds
+
+        function startTimer(minutes) {
+            clearInterval(timerInterval);
+            timeLeft = minutes * 60;
+            updateTimerDisplay();
+            
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    alert('Time\'s up! Take a break! 🎉');
+                }
+            }, 1000);
+        }
+
+        function resetTimer() {
+            clearInterval(timerInterval);
+            timeLeft = 1500;
+            updateTimerDisplay();
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            document.getElementById('timerDisplay').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        // Notes Functionality
+        function saveNote() {
+            const noteInput = document.getElementById('notesInput');
+            const note = noteInput.value.trim();
+            
+            if (note) {
+                const notes = JSON.parse(localStorage.getItem('learningNotes') || '[]');
+                notes.push({
+                    text: note,
+                    timestamp: new Date().toLocaleString()
+                });
+                
+                localStorage.setItem('learningNotes', JSON.stringify(notes));
+                noteInput.value = '';
+                loadNotes();
+            }
+        }
+
+        function loadNotes() {
+            const notesList = document.getElementById('notesList');
+            const notes = JSON.parse(localStorage.getItem('learningNotes') || '[]');
+            
+            notesList.innerHTML = '';
+            notes.slice(-5).reverse().forEach(note => {
+                const noteElement = document.createElement('div');
+                noteElement.className = 'note-item';
+                noteElement.innerHTML = `
+                    <p>${note.text}</p>
+                    <small style="color: #666;">${note.timestamp}</small>
+                `;
+                notesList.appendChild(noteElement);
+            });
+        }
+
+        // Resource Links
+        function openResource(url) {
+            window.open(url, '_blank');
+        }
+
+        function openCodePen() {
+            window.open('https://codepen.io/pen/', '_blank');
+        }
+
+        function openJSFiddle() {
+            window.open('https://jsfiddle.net/', '_blank');
+        }
+
+        // Goals Functionality
+        function addGoal() {
+            const goal = prompt('Enter your new learning goal:');
+            if (goal) {
+                alert('Goal added: ' + goal);
+            }
+        }
+    </script>
+</body>
+</html>
